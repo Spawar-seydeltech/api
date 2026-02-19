@@ -1,43 +1,59 @@
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "https://www.arlec.com.au");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") return res.status(200).end();
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
-  const { filename, mimeType } = req.body;
+  if (req.method !== "POST") {
+    return res.status(405).end();
+  }
 
-  const shopifyRes = await fetch(
-    `https://yourstore.myshopify.com/admin/api/2025-01/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": process.env.SHOPIFY_ADMIN_TOKEN,
-      },
-      body: JSON.stringify({
-        query: `
-          mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
-            stagedUploadsCreate(input: $input) {
-              stagedTargets {
-                url
-                resourceUrl
-                parameters { name value }
+  try {
+    const { filename, mimeType } = req.body;
+
+    const shopifyRes = await fetch(
+      `https://www.arlec.com.au/admin/api/2025-01/graphql.json`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": process.env.SHOPIFY_ADMIN_TOKEN,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
+              stagedUploadsCreate(input: $input) {
+                stagedTargets {
+                  url
+                  resourceUrl
+                  parameters { name value }
+                }
+                userErrors { field message }
               }
-              userErrors { field message }
             }
+          `,
+          variables: {
+            input: [{ filename, mimeType, resource: "FILE", httpMethod: "POST" }]
           }
-        `,
-        variables: {
-          input: [{ filename, mimeType, resource: "FILE", httpMethod: "POST" }]
-        }
-      })
+        })
+      }
+    );
+
+    const data = await shopifyRes.json();
+    console.log("Shopify response:", JSON.stringify(data));
+
+    if (!data.data || data.data.stagedUploadsCreate.userErrors.length > 0) {
+      return res.status(500).json({ error: "Shopify error", details: data });
     }
-  );
 
-  const data = await shopifyRes.json();
-  const target = data.data.stagedUploadsCreate.stagedTargets[0];
+    const target = data.data.stagedUploadsCreate.stagedTargets[0];
+    return res.status(200).json(target);
 
-  return res.status(200).json(target);
+  } catch (err) {
+    console.log("Error:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
 };
