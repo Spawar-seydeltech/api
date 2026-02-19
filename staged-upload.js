@@ -1,5 +1,4 @@
-export default async function handler(req, res) {
-  // CORS
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "https://yourstore.myshopify.com");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -41,4 +40,4 @@ export default async function handler(req, res) {
   const target = data.data.stagedUploadsCreate.stagedTargets[0];
 
   return res.status(200).json(target);
-}
+};
