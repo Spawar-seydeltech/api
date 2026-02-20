@@ -29,19 +29,3 @@ module.exports = async function handler(req, res) {
     return res.status(500).send(`Error: ${err.message}`);
   }
 };
-```
-
-### 2. Add Two More Environment Variables to Vercel
-
-Go to **Vercel → Settings → Environment Variables** and add:
-
-| Name | Value |
-|---|---|
-| `SHOPIFY_CLIENT_ID` | Your client ID from Partners dashboard |
-| `SHOPIFY_CLIENT_SECRET` | Your client secret from Partners dashboard |
-
-### 3. Commit and Redeploy then Visit This URL
-
-After Vercel redeploys, visit this in your browser:
-```
-https://arlec.myshopify.com/admin/oauth/authorize?client_id=YOUR_CLIENT_ID&scope=read_files,write_files&redirect_uri=https://arlec-fan-warranty.vercel.app/api/callback&state=random123
