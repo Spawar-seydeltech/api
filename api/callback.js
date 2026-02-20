@@ -16,12 +16,15 @@ module.exports = async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
+    // Get raw text first before trying to parse
+    const rawText = await response.text();
 
+    // Show raw response so we can see what Shopify is returning
     return res.status(200).send(`
-      <h2>Your Access Token:</h2>
-      <p style="word-break:break-all; font-size:18px; font-weight:bold;">${data.access_token}</p>
-      <p>Scope: ${data.scope}</p>
+      <h2>Raw Shopify Response:</h2>
+      <pre>${rawText}</pre>
+      <h2>Status Code:</h2>
+      <p>${response.status}</p>
     `);
 
   } catch (err) {
