@@ -15,7 +15,15 @@ module.exports = async function handler(req, res) {
     })
   });
 
-  const rawText = await response.text();
+  const data = await response.json();
+  
+  // Log to Vercel logs
+  console.log("ACCESS TOKEN:", data.access_token);
+  console.log("FULL RESPONSE:", JSON.stringify(data));
 
-  return res.status(200).send(`<pre>${rawText}</pre>`);
+  return res.status(200).send(`
+    <h2>Token Exchange Complete</h2>
+    <p>Check Vercel logs for your token</p>
+    <pre>${JSON.stringify(data, null, 2)}</pre>
+  `);
 };
